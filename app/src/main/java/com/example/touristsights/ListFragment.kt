@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.touristsights.databinding.FragmentListBinding
@@ -39,7 +40,24 @@ class ListFragment : Fragment() {
                         else
                             -> GridLayoutManager(context, 2)
                     }
-            adapter = SightAdapter(context, getSights(resources))
+            adapter = SightAdapter(context, getSights(resources)).apply {
+                setOnItemClickListener { position: Int ->
+                    fragmentManager?.let { manager: FragmentManager ->
+                        val tag = "DetailFragment"
+                        var fragment = manager.findFragmentByTag(tag)
+                        if (fragment == null){
+                            fragment = DetailFragment()
+                            fragment.arguments = Bundle().apply {
+                                putInt(ROW_POSITION, position)
+                            }
+                            manager.beginTransaction().apply {
+                                replace(R.id.content, fragment, tag)
+                                addToBackStack(null)
+                            }.commit()
+                        }
+                    }
+                }
+            }
         }
     }
 
